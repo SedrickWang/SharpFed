@@ -138,18 +138,18 @@ class ClientObject:
 
     def _start(self) -> bool:
         while self.__is_connected_to_server() == False:
-            log_print("[Client Info] Server not connected...", color = 'y')
+            log_print("[Client %d Info] Server not connected..." % self.__id_number, color = 'm')
             self.__request_connect_to_server()
-            time.sleep(6)
+            time.sleep(3)
 
-        log_print("[Client Info] Server successfully connected", color = 'g')
+        log_print("[Client %d Info] Server successfully connected" % self.__id_number, color = 'g')
         
         while os.path.exists(self.__comm_cache_folder.joinpath('exit')) == False:
             if self.__is_selected():
-                log_print("[Client Info] Be selected to participate in the update and begin local update...", color = 'g')
+                log_print("[Client %d Info] Be selected to participate in the update and begin local update..." % self.__id_number, color = 'm')
                 self.__local_update()
-                log_print("[Client Info] Local update finished!", color = 'g')
-        log_print("[Client Info] Training finished!", color = 'g')
+                log_print("[Client %d Info] Local update finished!" % self.__id_number, color = 'g')
+        log_print("[Client %d Info] Training finished!" % self.__id_number, color = 'b')
         return True
 
 
@@ -328,11 +328,11 @@ class ServerObject:
                 this_round_connected_clients_id = self.__get_connected_clients_id()
                 if len(this_round_connected_clients_id) < self.__min_connected_clients_to_start:
                     log_print("[Server Info] Round %d, current %d clients connected, min %d, waiting more clients to participate..."
-                                % (r, len(this_round_connected_clients_id), self.__min_connected_clients_to_start), color = 'y')
+                                % (r, len(this_round_connected_clients_id), self.__min_connected_clients_to_start), color = 'm')
                     time.sleep(3)
                 else:
                     break
-            time.sleep(6)
+            time.sleep(3)
 
             ## Select participate clients
             meta_data_dictlist = []
@@ -348,14 +348,14 @@ class ServerObject:
             log_print("[Server Info] Round %d, %d/%d clients are selected to participate"
                         % (r, len(this_round_selected_clients_id), len(this_round_connected_clients_id)), 
                         color = 'g')
-            time.sleep(6)
+            time.sleep(3)
 
             ## Waiting for selected clients to finish local update
             while True:
                 remaining_selected_clients = self.__get_round_selected_clients_id()
                 log_print("[Server Info] Round %d, waiting %d/%d selected clients to finish local update..."
-                            % (r, len(remaining_selected_clients), len(this_round_selected_clients_id)), color = 'g')
-                time.sleep(20)
+                            % (r, len(remaining_selected_clients), len(this_round_selected_clients_id)), color = 'm')
+                time.sleep(60)
                 if len(remaining_selected_clients) == 0:
                     break
             
@@ -391,16 +391,16 @@ class ServerObject:
             file = open(self.__comm_cache_folder.joinpath('global_model_parameters.pkl'), "wb")
             pickle.dump(updated_global_model_parameters, file)
             file.close()
-            time.sleep(6)
+            time.sleep(3)
 
             ## Save the updated global model parameters
             file = open(self.__round_model_save_folder.joinpath('global_model_parameters_%d.pkl' % r), "wb")
             pickle.dump(updated_global_model_parameters, file)
             file.close()
             log_print("[Server Info] Round %d finished! " % r, 'g')
-            time.sleep(6)
+            time.sleep(3)
         
         # Training finished
         create_message_file(self.__comm_cache_folder.joinpath('exit'))
-        log_print("[Server Info] Training finished!", 'g')
+        log_print("[Server Info] Training finished!", 'b')
         return True
