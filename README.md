@@ -147,3 +147,9 @@ Advantages:
   # Wait for all background processes to complete
   wait
   ```
+
+## Use with Install
+You can also install the package using pip
+```bash
+pip install sharpfed
+```
