@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sharpfed",
-    version="0.0.2",
+    version="0.0.3",
     author="wangshuo",
     author_email="shuowan16@163.com",
     description="Fast and easy federated learning framework based on Tensorflow",

@@ -9,6 +9,7 @@ from joblib import Parallel, delayed
 from typing import List
 from termcolor import colored
 
+
 def create_message_file(path: pathlib.PosixPath):
     file = open(path, "wb")
     file.close()
@@ -45,6 +46,7 @@ def log_print(text, color, end = '\n'):
         print(colored(text, 'magenta'), end = end)
     else:
         print(text, end = end)
+
 
 class ClientObject:
     def __init__(self):
@@ -254,16 +256,22 @@ class ServerObject:
         item = layermask_dictlist[0]
         client_id = list(item.keys())[0]
         layermask_vector = item[client_id]
-        layerwise_denominator = np.zeros_like(layermask_vector)
+        layerwise_denominator = np.zeros_like(layermask_vector, dtype = np.float32)
         for item in layermask_dictlist:
             client_id = list(item.keys())[0]
-            layerwise_denominator += aggregation_weights[client_id]*item[client_id]
+            layermask_vector = item[client_id]
+            layerwise_denominator += aggregation_weights[client_id]*layermask_vector
 
         ## Parallelly get weighted updates of input models
         def __weight_model_updates(item: dict):
+            weighted_model_updates = []
             client_id = list(item.keys())[0]
             model_updates = item[client_id]
-            weighted_model_updates = [model_updates[layer_idx]*aggregation_weights[client_id]/layerwise_denominator[layer_idx] for layer_idx in range(len(model_updates))]
+            for layer_idx in range(len(model_updates)):
+                if layerwise_denominator[layer_idx] > 0:
+                    weighted_model_updates.append(model_updates[layer_idx]*aggregation_weights[client_id]/layerwise_denominator[layer_idx])
+                else:
+                    weighted_model_updates.append(np.zeros_like(model_updates[layer_idx]))
             return {client_id: weighted_model_updates}
 
         weighted_model_updates_dictlist = Parallel(n_jobs = para_njobs, prefer = "threads")(delayed(__weight_model_updates)(item) for item in model_updates_dictlist)
@@ -355,7 +363,7 @@ class ServerObject:
                 remaining_selected_clients = self.__get_round_selected_clients_id()
                 log_print("[Server Info] Round %d, waiting %d/%d selected clients to finish local update..."
                             % (r, len(remaining_selected_clients), len(this_round_selected_clients_id)), color = 'm')
-                time.sleep(60)
+                time.sleep(6)
                 if len(remaining_selected_clients) == 0:
                     break
             

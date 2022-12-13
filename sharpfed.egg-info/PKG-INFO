@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: sharpfed
-Version: 0.0.2
+Version: 0.0.3
 Summary: Fast and easy federated learning framework based on Tensorflow
 Home-page: https://github.com/WhatIsSurprise/SharpFed
 Author: wangshuo
